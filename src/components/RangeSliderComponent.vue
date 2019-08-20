@@ -1,6 +1,7 @@
 <template>
     <div>
         is dragging:{{isDragging}} - onMouseDownPosition: {{onMouseDownPosition}} - handlePosition: {{handlePosition}} -
+        <!--        numberOfSteps: {{numberOfSteps}}-->
 
 
         <div class="range-slider-component">
@@ -8,6 +9,9 @@
             <div class="bar"
                  ref="bar">
                 <span class="min">{{min}}</span>
+                <template v-for="step in numberOfSteps">
+                    <span class="checkpoint" :style="step">|</span>
+                </template>
                 <button
                     :style="handleStyles"
                     ref="handle"
@@ -15,7 +19,7 @@
                     type="button"
                     @mousedown="onMouseDownHandler"
                 >
-                    
+
                 </button>
                 <span class="max">{{max}}</span>
             </div>
@@ -38,6 +42,7 @@
 		},
 		data() {
 			return {
+				type: 'step',
 				isDragging: false,
 				onMouseDownPosition: 0,
 				onMouseUpPosition: 0,
@@ -49,10 +54,10 @@
 		methods: {
 			validateForBoundaries(value) {
 
-				if (value >= this.max) {
-					return this.max;
-				} else if (value <= this.min) {
-					return this.min;
+				if (value >= 100) {
+					return 100;
+				} else if (value <= 0) {
+					return 0;
 				} else {
 					return value;
 				}
@@ -71,7 +76,18 @@
 					return;
 				}
 
-				this.handlePosition = this.validateForBoundaries(((e.clientX - this.onMouseDownPosition) / this.barWidth) * 100);
+				const pos = (e.clientX - this.onMouseDownPosition);
+
+				console.log(pos);
+
+				if (this.type === 'smooth') {
+					//smooth
+					this.handlePosition = this.validateForBoundaries(((e.clientX - this.onMouseDownPosition) / this.barWidth) * 100);
+				} else {
+					// step
+					this.handlePosition = this.validateForBoundaries(((e.clientX - this.onMouseDownPosition) / this.barWidth) * 100);
+				}
+
 			}
 		},
 		computed: {
@@ -86,11 +102,26 @@
 				}
 			},
 			currentValue() {
-				const range = (this.max / this.barWidth) * 100;
 
-				console.log('this.step', this.step);
+				return Math.round((this.max / 100) * this.handlePosition);
 
-				return ((this.handlePosition * this.step) / range)
+			},
+			numberOfSteps() {
+				const steps = this.max / this.step;
+				const checkpoints = (this.barWidth * 100) / (this.barWidth / steps);
+				const result = [];
+				let i;
+
+				console.log('steps', steps);
+
+				for (i = 0; i < steps; i++) {
+					console.log('ASDFASDF');
+					result.push({left: `${checkpoints * i}%`});
+				}
+
+				console.log('result', result);
+
+				return result;
 
 			}
 		},
@@ -137,6 +168,12 @@
             top: 50%;
             transform: translateY(-50%);
             /*left: 0;*/
+        }
+
+        .checkpoint {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
         }
 
         .result {

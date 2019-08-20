@@ -5,7 +5,7 @@
             <range-slider-component
                 ref="rangeSlider"
                 :min="0"
-                :max="100"
+                :max="6"
                 :step="2"
             ></range-slider-component>
         </div>
