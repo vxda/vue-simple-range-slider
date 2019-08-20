@@ -9,15 +9,15 @@
             <div class="bar"
                  ref="bar">
                 <span class="min">{{min}}</span>
-                <template v-for="step in numberOfSteps">
-                    <span class="checkpoint" :style="step">|</span>
-                </template>
+                <!--                <template v-for="step in numberOfSteps">-->
+                <!--                    <span :key="step" class="checkpoint" :style="{left: `${step}%`}">|</span>-->
+                <!--                </template>-->
                 <button
-                    :style="handleStyles"
-                    ref="handle"
-                    class="handle"
-                    type="button"
-                    @mousedown="onMouseDownHandler"
+                        :style="handleStyles"
+                        ref="handle"
+                        class="handle"
+                        type="button"
+                        @mousedown="onMouseDownHandler"
                 >
 
                 </button>
@@ -33,102 +33,119 @@
 
 
 <script>
-	export default {
-		name: 'RangeSliderComponent',
-		props: {
-			min: Number,
-			max: Number,
-			step: Number
-		},
-		data() {
-			return {
-				type: 'step',
-				isDragging: false,
-				onMouseDownPosition: 0,
-				onMouseUpPosition: 0,
-				handlePosition: 0,
-				barWidth: 0,
-				isOutOfBounds: false
-			}
-		},
-		methods: {
-			validateForBoundaries(value) {
+    export default {
+        name: 'RangeSliderComponent',
+        props: {
+            min: Number,
+            max: Number,
+            step: Number,
+            decimals: Number,
+            default: Number
+        },
+        data() {
+            return {
+                type: 'step',
+                isDragging: false,
+                onMouseDownPosition: 0,
+                onMouseUpPosition: 0,
+                handlePosition: this.default ? this.getDefault() : 0,
+                barWidth: 0,
+                isOutOfBounds: false
+            }
+        },
+        methods: {
+            getStepsNumber() {
+                return Math.ceil((this.max - this.min) / this.step);
+            },
+            getDefault() {
+                if (this.default < this.min) {
+                    return 0;
+                } else if (this.default > this.max) {
+                    return 100;
+                } else {
+                    return ((this.default - this.min) / this.step / this.getStepsNumber()) * 100;
+                }
 
-				if (value >= 100) {
-					return 100;
-				} else if (value <= 0) {
-					return 0;
-				} else {
-					return value;
-				}
-			},
-			onMouseDownHandler(e) {
-				this.isDragging = true;
-				const {handle} = this.$refs;
+            },
+            validateForBoundaries(value) {
+                if (value >= 100) {
+                    return 100;
+                } else if (value <= 0) {
+                    return 0;
+                } else {
+                    return value;
+                }
+            },
+            onMouseDownHandler(e) {
+                this.isDragging = true;
+                const {handle} = this.$refs;
 
-				this.onMouseDownPosition = e.clientX - handle.offsetLeft
-			},
-			onMouseUpHandler() {
-				this.isDragging = false;
-			},
-			onMouseMoveHandler(e) {
-				if (!this.isDragging) {
-					return;
-				}
+                this.onMouseDownPosition = e.clientX - handle.offsetLeft
+            },
+            onMouseUpHandler() {
+                this.isDragging = false;
+            },
+            onMouseMoveHandler(e) {
+                if (!this.isDragging) {
+                    return;
+                }
 
-				const pos = (e.clientX - this.onMouseDownPosition);
+                const pos = ((e.clientX - this.onMouseDownPosition) / this.barWidth) * 100;
 
-				console.log(pos);
+                if (this.type === 'smooth') {
+                    //smooth
+                    console.log('ASDASDASD');
+                    this.handlePosition = this.validateForBoundaries(pos);
+                } else {
+                    // step
 
-				if (this.type === 'smooth') {
-					//smooth
-					this.handlePosition = this.validateForBoundaries(((e.clientX - this.onMouseDownPosition) / this.barWidth) * 100);
-				} else {
-					// step
-					this.handlePosition = this.validateForBoundaries(((e.clientX - this.onMouseDownPosition) / this.barWidth) * 100);
-				}
+                    this.handlePosition = this.numberOfSteps.sort((a, b) => {
+                        return Math.abs(a - pos) - Math.abs(b - pos);
+                    })[0];
+                }
+            }
+        },
+        computed: {
+            handleStyles() {
+                return {
+                    left: `${this.handlePosition}%`
+                }
+            },
+            progressBarStyles() {
+                return {
+                    width: `${this.handlePosition}%`
+                }
+            },
+            currentValue() {
 
-			}
-		},
-		computed: {
-			handleStyles() {
-				return {
-					left: `${this.handlePosition}%`
-				}
-			},
-			progressBarStyles() {
-				return {
-					width: `${this.handlePosition}%`
-				}
-			},
-			currentValue() {
+                return (((this.max - this.min) / 100) * this.handlePosition + this.min).toFixed(this.decimals || 0);
 
-				return Math.round((this.max / 100) * this.handlePosition);
+            },
+            numberOfSteps() {
+                const steps = this.getStepsNumber();
+                const result = [];
+                let i;
 
-			},
-			numberOfSteps() {
-				const steps = this.max / this.step;
-				const checkpoints = (this.barWidth * 100) / (this.barWidth / steps);
-				const result = [];
-				let i;
+                for (i = 0; i < steps + 1; i++) {
+                    result.push(i / steps * 100);
+                }
 
-				console.log('steps', steps);
+                return result.sort((a, b) => (a - b));
 
-				for (i = 0; i < steps; i++) {
-					console.log('ASDFASDF');
-					result.push({left: `${checkpoints * i}%`});
-				}
-
-				console.log('result', result);
-
-				return result;
-
-			}
-		},
-		mounted() {
-			this.barWidth = this.$refs.bar.getBoundingClientRect().width;
-		}
-	}
+            }
+        },
+        mounted() {
+            this.barWidth = this.$refs.bar.getBoundingClientRect().width;
+        },
+        watch: {
+            currentValue: {
+                immediate: false,
+                handler(newValue) {
+                    this.$emit('onValueChange', newValue);
+                }
+            }
+        }
+    }
 </script>
 
 <style lang="scss">
@@ -166,7 +183,9 @@
         .handle {
             position: absolute;
             top: 50%;
-            transform: translateY(-50%);
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
             /*left: 0;*/
         }
 

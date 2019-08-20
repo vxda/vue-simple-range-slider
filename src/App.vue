@@ -4,9 +4,12 @@
         <div class="wrapper">
             <range-slider-component
                 ref="rangeSlider"
-                :min="0"
-                :max="6"
-                :step="2"
+                :min="4"
+                :max="50"
+                :default="12"
+                :decimals="0"
+                :step="4"
+                @onValueChange="onValChange"
             ></range-slider-component>
         </div>
     </div>
@@ -26,7 +29,10 @@
 			},
 			onMouseUpHandler(e) {
 				this.$refs.rangeSlider.onMouseUpHandler(e);
-			}
+			},
+            onValChange(val) {
+                console.log('val', val);
+            }
 		}
 	}
 </script>
