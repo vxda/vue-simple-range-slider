@@ -9,7 +9,8 @@
                 <span class="min">{{min}}</span>
                 <template v-if="isStepsVisible">
                     <template v-for="step in numberOfSteps">
-                        <span :key="step" :style="{left: `${step}%`}" class="checkpoint" :class="{'is-selected': handlePosition > step}">|</span>
+                        <span :class="{'is-selected': handlePosition > step}" :key="step" :style="{left: `${step}%`}"
+                              class="checkpoint">|</span>
                     </template>
                 </template>
                 <button
@@ -51,6 +52,7 @@
         },
         data() {
             return {
+                steps: this.getStepsNumber(),
                 isDragging: false,
                 onMouseDownPosition: 0,
                 onMouseUpPosition: 0,
@@ -108,7 +110,6 @@
 
                 if (this.type === 'smooth') {
                     //smooth
-                    console.log('ASDASDASD');
                     this.handlePosition = this.validateForBoundaries(pos);
                 } else {
                     // step
@@ -134,12 +135,11 @@
                 return (((this.max - this.min) / 100) * this.handlePosition + this.min).toFixed(this.decimals || 0);
             },
             numberOfSteps() {
-                const steps = this.getStepsNumber();
                 const result = [];
                 let i;
 
-                for (i = 0; i < steps + 1; i++) {
-                    result.push(i / steps * 100);
+                for (i = 0; i < this.steps + 1; i++) {
+                    result.push(i / this.steps * 100);
                 }
 
                 return result.sort((a, b) => (a - b));

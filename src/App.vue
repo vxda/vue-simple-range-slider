@@ -5,8 +5,8 @@
             <range-slider-component
                     :decimals="0"
                     :default="0"
-                    :max="100"
-                    :min="0"
+                    :max="1000"
+                    :min="800"
                     :step="5"
                     :is-steps-visible="true"
                     @onValueChange="onValChange"
