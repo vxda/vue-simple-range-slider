@@ -1,29 +1,28 @@
 <template>
     <div>
-        is dragging:{{isDragging}} - onMouseDownPosition: {{onMouseDownPosition}} - handlePosition: {{handlePosition}} -
-        <!--        numberOfSteps: {{numberOfSteps}}-->
-
-
-        <div class="range-slider-component">
+        handlePosition: {{handlePosition}}
+        <div @click="onBarClick"
+             class="range-slider-component">
 
             <div class="bar"
                  ref="bar">
                 <span class="min">{{min}}</span>
-                <!--                <template v-for="step in numberOfSteps">-->
-                <!--                    <span :key="step" class="checkpoint" :style="{left: `${step}%`}">|</span>-->
-                <!--                </template>-->
+                <template v-if="isStepsVisible">
+                    <template v-for="step in numberOfSteps">
+                        <span :key="step" :style="{left: `${step}%`}" class="checkpoint" :class="{'is-selected': handlePosition > step}">|</span>
+                    </template>
+                </template>
                 <button
                         :style="handleStyles"
-                        ref="handle"
-                        class="handle"
-                        type="button"
                         @mousedown="onMouseDownHandler"
-                >
-
+                        class="handle"
+                        ref="handle"
+                        type="button">
                 </button>
                 <span class="max">{{max}}</span>
+                <div :style="progressBarStyles" class="progress-bar"></div>
             </div>
-            <div class="progress-bar" :style="progressBarStyles"></div>
+
         </div>
         <div class="result">
             currentValue: {{currentValue}}
@@ -40,11 +39,18 @@
             max: Number,
             step: Number,
             decimals: Number,
-            default: Number
+            default: Number,
+            isStepsVisible: {
+                type: Boolean,
+                default: false
+            },
+            type: {
+                type: String,
+                default: 'step'
+            }
         },
         data() {
             return {
-                type: 'step',
                 isDragging: false,
                 onMouseDownPosition: 0,
                 onMouseUpPosition: 0,
@@ -54,6 +60,15 @@
             }
         },
         methods: {
+            onBarClick(e) {
+                if (!this.isDragging) {
+                    const pos = ((e.clientX - this.$el.offsetLeft) / this.barWidth) * 100;
+
+                    this.handlePosition = this.handlePosition = this.numberOfSteps.sort((a, b) => {
+                        return Math.abs(a - pos) - Math.abs(b - pos);
+                    })[0];
+                }
+            },
             getStepsNumber() {
                 return Math.ceil((this.max - this.min) / this.step);
             },
@@ -65,7 +80,6 @@
                 } else {
                     return ((this.default - this.min) / this.step / this.getStepsNumber()) * 100;
                 }
-
             },
             validateForBoundaries(value) {
                 if (value >= 100) {
@@ -117,9 +131,7 @@
                 }
             },
             currentValue() {
-
                 return (((this.max - this.min) / 100) * this.handlePosition + this.min).toFixed(this.decimals || 0);
-
             },
             numberOfSteps() {
                 const steps = this.getStepsNumber();
@@ -173,11 +185,13 @@
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
+            z-index: 1;
         }
 
         .progress-bar {
             width: 0;
             background-color: green;
+            z-index: 2;
         }
 
         .handle {
@@ -186,13 +200,28 @@
             transform: translate(-50%, -50%);
             width: 20px;
             height: 20px;
-            /*left: 0;*/
+            z-index: 10;
+            overflow: hidden;
+            backface-visibility: hidden;
+            margin: 0;
         }
 
         .checkpoint {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
+            user-select: none;
+            display: block;
+            white-space: nowrap;
+            font-size: 0;
+            color: transparent;
+            width: 2px;
+            height: 15px;
+            background-color: #ccc;
+
+            &.is-selected {
+                background-color: green;
+            }
         }
 
         .result {

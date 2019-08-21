@@ -1,40 +1,48 @@
 <template>
-    <div id="app" @mousemove="onMouseMoveHandler" @mouseup="onMouseUpHandler">
+    <div @mousemove="onMouseMoveHandler" @mouseup="onMouseUpHandler" id="app">
         <h2>this is my slider</h2>
         <div class="wrapper">
             <range-slider-component
-                ref="rangeSlider"
-                :min="4"
-                :max="50"
-                :default="12"
-                :decimals="0"
-                :step="4"
-                @onValueChange="onValChange"
+                    :decimals="0"
+                    :default="0"
+                    :max="100"
+                    :min="0"
+                    :step="5"
+                    :is-steps-visible="true"
+                    @onValueChange="onValChange"
+                    ref="rangeSlider"
             ></range-slider-component>
         </div>
+
+        VALUE EXTRACTED: {{rangeSliderValue}}
     </div>
 </template>
 
 <script>
-	import RangeSliderComponent from './components/RangeSliderComponent';
+    import RangeSliderComponent from './components/RangeSliderComponent';
 
-	export default {
-		name: 'app',
-		components: {
-			RangeSliderComponent
-		},
-		methods: {
-			onMouseMoveHandler(e) {
-				this.$refs.rangeSlider.onMouseMoveHandler(e);
-			},
-			onMouseUpHandler(e) {
-				this.$refs.rangeSlider.onMouseUpHandler(e);
-			},
-            onValChange(val) {
-                console.log('val', val);
+    export default {
+        name: 'app',
+        data() {
+            return {
+                rangeSliderValue: 0
             }
-		}
-	}
+        },
+        components: {
+            RangeSliderComponent
+        },
+        methods: {
+            onMouseMoveHandler(e) {
+                this.$refs.rangeSlider.onMouseMoveHandler(e);
+            },
+            onMouseUpHandler(e) {
+                this.$refs.rangeSlider.onMouseUpHandler(e);
+            },
+            onValChange(val) {
+                this.rangeSliderValue = val;
+            }
+        }
+    }
 </script>
 
 <style lang="scss">
