@@ -4,7 +4,7 @@
         <div class="wrapper">
             <range-slider-component
                     :decimals="0"
-                    :default="0"
+                    :default="805"
                     :max="1000"
                     :min="800"
                     :step="5"

@@ -64,12 +64,15 @@
         methods: {
             onBarClick(e) {
                 if (!this.isDragging) {
-                    const pos = ((e.clientX - this.$el.offsetLeft) / this.barWidth) * 100;
+                    const position = ((e.clientX - this.$el.offsetLeft) / this.barWidth) * 100;
 
-                    this.handlePosition = this.handlePosition = this.numberOfSteps.sort((a, b) => {
-                        return Math.abs(a - pos) - Math.abs(b - pos);
-                    })[0];
+                    this.setHandlePosition(position);
                 }
+            },
+            setHandlePosition(position) {
+                this.handlePosition = this.handlePosition = this.numberOfSteps.sort((a, b) => {
+                    return Math.abs(a - position) - Math.abs(b - position);
+                })[0];
             },
             getStepsNumber() {
                 return Math.ceil((this.max - this.min) / this.step);
@@ -106,17 +109,14 @@
                     return;
                 }
 
-                const pos = ((e.clientX - this.onMouseDownPosition) / this.barWidth) * 100;
+                const position = ((e.clientX - this.onMouseDownPosition) / this.barWidth) * 100;
 
                 if (this.type === 'smooth') {
                     //smooth
-                    this.handlePosition = this.validateForBoundaries(pos);
+                    this.handlePosition = this.validateForBoundaries(position);
                 } else {
                     // step
-
-                    this.handlePosition = this.numberOfSteps.sort((a, b) => {
-                        return Math.abs(a - pos) - Math.abs(b - pos);
-                    })[0];
+                    this.setHandlePosition(position);
                 }
             }
         },
@@ -143,7 +143,6 @@
                 }
 
                 return result.sort((a, b) => (a - b));
-
             }
         },
         mounted() {
