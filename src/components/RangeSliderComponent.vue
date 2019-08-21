@@ -1,6 +1,5 @@
 <template>
     <div>
-        handlePosition: {{handlePosition}}
         <div @click="onBarClick"
              class="range-slider-component">
 
